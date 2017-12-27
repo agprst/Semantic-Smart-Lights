@@ -1,0 +1,311 @@
+@prefix : <#> .
+@prefix qu: <http://purl.org/NET/ssnx/qu/qu#> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix hds: <http://sensormeasurement.appspot.com/dataset/home-dataset#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix san: <http://www.irit.fr/recherches/MELODI/ontologies/SAN#> .
+@prefix ssn: <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix iotins: <http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#> .
+@prefix iotlite: <http://purl.oclc.org/NET/UNIS/fiware/iot-lite#> .
+@base <http://www.w3.org/2002/07/owl#> .
+
+[ rdf:type owl:Ontology
+ ] .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.oclc.org/NET/UNIS/fiware/iot-lite#altRelative
+iotlite:altRelative rdf:type owl:AnnotationProperty ;
+                    rdfs:range geo:Point ;
+                    rdfs:domain ssn:Deployment .
+
+
+###  http://purl.oclc.org/NET/UNIS/fiware/iot-lite#hasMetadata
+iotlite:hasMetadata rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.oclc.org/NET/UNIS/fiware/iot-lite#hasQuantityKind
+iotlite:hasQuantityKind rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.oclc.org/NET/UNIS/fiware/iot-lite#hasSensingDevice
+iotlite:hasSensingDevice rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.oclc.org/NET/UNIS/fiware/iot-lite#hasUnit
+iotlite:hasUnit rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.oclc.org/NET/UNIS/fiware/iot-lite#metaDataValue
+iotlite:metaDataValue rdf:type owl:AnnotationProperty .
+
+
+###  http://www.irit.fr/recherches/MELODI/ontologies/SAN#hasActuatingProperty
+san:hasActuatingProperty rdf:type owl:AnnotationProperty ;
+                         rdfs:range san:ActuatingProperty ;
+                         rdfs:domain san:Actuator .
+
+
+###  http://www.irit.fr/recherches/MELODI/ontologies/SAN#hasEffect
+san:hasEffect rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2003/01/geo/wgs84_pos#hasLocation
+geo:hasLocation rdf:type owl:AnnotationProperty ;
+                rdfs:range ssn:Deployment ;
+                rdfs:domain ssn:Device .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#hasDeployment
+ssn:hasDeployment rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#hasSubsystem
+ssn:hasSubsystem rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#hasValue
+ssn:hasValue rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://purl.oclc.org/NET/UNIS/fiware/iot-lite#Metadata
+iotlite:Metadata rdf:type owl:Class ;
+                 rdfs:subClassOf ssn:Sensor .
+
+
+###  http://purl.org/NET/ssnx/qu/qu#Unit
+qu:Unit rdf:type owl:Class ;
+        rdfs:subClassOf ssn:Sensor .
+
+
+###  http://purl.org/NET/ssnx/qu/qu#quantityKind
+qu:quantityKind rdf:type owl:Class ;
+                rdfs:subClassOf ssn:Sensor .
+
+
+###  http://sensormeasurement.appspot.com/dataset/home-dataset#DoorClosed
+hds:DoorClosed rdf:type owl:Class ;
+               rdfs:subClassOf san:Actuator .
+
+
+###  http://sensormeasurement.appspot.com/dataset/home-dataset#NobodyInTheRoom
+hds:NobodyInTheRoom rdf:type owl:Class ;
+                    rdfs:subClassOf ssn:Sensor .
+
+
+###  http://www.irit.fr/recherches/MELODI/ontologies/SAN#ActuatingDevice
+san:ActuatingDevice rdf:type owl:Class ;
+                    rdfs:subClassOf san:Actuator ,
+                                    ssn:Device ;
+                    owl:disjointWith ssn:SensingDevice .
+
+
+###  http://www.irit.fr/recherches/MELODI/ontologies/SAN#ActuatingProperty
+san:ActuatingProperty rdf:type owl:Class ;
+                      rdfs:subClassOf san:Actuator .
+
+
+###  http://www.irit.fr/recherches/MELODI/ontologies/SAN#Actuator
+san:Actuator rdf:type owl:Class .
+
+
+###  http://www.irit.fr/recherches/MELODI/ontologies/SAN#Effect
+san:Effect rdf:type owl:Class ;
+           rdfs:subClassOf san:Actuator .
+
+
+###  http://www.w3.org/2003/01/geo/wgs84_pos#Point
+geo:Point rdf:type owl:Class ;
+          rdfs:subClassOf ssn:Deployment .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#Deployment
+ssn:Deployment rdf:type owl:Class ;
+               rdfs:subClassOf ssn:Device .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#Device
+ssn:Device rdf:type owl:Class ;
+           rdfs:subClassOf ssn:system .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#SensingDevice
+ssn:SensingDevice rdf:type owl:Class ;
+                  rdfs:subClassOf ssn:Device ,
+                                  ssn:Sensor .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#Sensor
+ssn:Sensor rdf:type owl:Class .
+
+
+###  http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#system
+ssn:system rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#ActuatorRoomwew3445
+iotins:ActuatorRoomwew3445 rdf:type owl:NamedIndividual ,
+                                    ssn:Deployment ;
+                           geo:hasLocation iotins:locationRoomwew3445 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#PIR5412
+iotins:PIR5412 rdf:type owl:NamedIndividual ,
+                        ssn:Device ;
+               ssn:hasSubsystem iotins:motionSensorRoomPIR5412 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#PIR5412Measurement
+iotins:PIR5412Measurement rdf:type owl:NamedIndividual ,
+                                   iotlite:Metadata ,
+                                   hds:NobodyInTheRoom ;
+                          iotlite:metaDataValue "NotDetected" .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#SemanticHome
+iotins:SemanticHome rdf:type owl:NamedIndividual ,
+                             ssn:system ;
+                    ssn:hasSubsystem iotins:PIR5412 ,
+                                     iotins:Ultrasonik2314 ,
+                                     iotins:wew3445 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#SensorRoomPIR5412
+iotins:SensorRoomPIR5412 rdf:type owl:NamedIndividual ,
+                                  ssn:Deployment ;
+                         geo:hasLocation iotins:locationRoomPIR5412 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#SensorRoomUltrasonik2314
+iotins:SensorRoomUltrasonik2314 rdf:type owl:NamedIndividual ,
+                                         ssn:Deployment ;
+                                geo:hasLocation iotins:locationRoomUltrasonik2314 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#Ultrasonik2314
+iotins:Ultrasonik2314 rdf:type owl:NamedIndividual ,
+                               ssn:Device ;
+                      ssn:hasSubsystem iotins:distanceSensorRoomUltrasonik2314 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#Ultrasonik2314Measurement
+iotins:Ultrasonik2314Measurement rdf:type owl:NamedIndividual ,
+                                          iotlite:Metadata ,
+                                          hds:DoorClosed ;
+                                 iotlite:metaDataValue "123"^^xsd:int .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#actuatorwew3445
+iotins:actuatorwew3445 rdf:type owl:NamedIndividual ,
+                                san:Actuator ;
+                       san:hasActuatingProperty iotins:wew3445Property ;
+                       san:hasEffect san:Light ;
+                       ssn:hasSubsystem iotins:wew3445ActuatorRoomwew3445 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#distanceSensorRoomUltrasonik2314
+iotins:distanceSensorRoomUltrasonik2314 rdf:type owl:NamedIndividual ,
+                                                 ssn:SensingDevice ;
+                                        ssn:hasDeployment iotins:SensorRoomUltrasonik2314 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#locationRoomPIR5412
+iotins:locationRoomPIR5412 rdf:type owl:NamedIndividual ,
+                                    geo:Point ;
+                           iotlite:altRelative "Ruang Tamu" .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#locationRoomUltrasonik2314
+iotins:locationRoomUltrasonik2314 rdf:type owl:NamedIndividual ,
+                                           geo:Point ;
+                                  iotlite:altRelative "Ruang Tamu" .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#locationRoomwew3445
+iotins:locationRoomwew3445 rdf:type owl:NamedIndividual ,
+                                    geo:Point ;
+                           iotlite:altRelative "Ruang Tamu" .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#motionSensorRoomPIR5412
+iotins:motionSensorRoomPIR5412 rdf:type owl:NamedIndividual ,
+                                        ssn:SensingDevice ;
+                               ssn:hasDeployment iotins:SensorRoomPIR5412 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#sensorPIR5412
+iotins:sensorPIR5412 rdf:type owl:NamedIndividual ,
+                              ssn:Sensor ;
+                     iotlite:hasMetadata iotins:PIR5412Measurement ;
+                     iotlite:hasQuantityKind qu:motion ;
+                     iotlite:hasSensingDevice iotins:motionSensorRoomPIR5412 ;
+                     iotlite:hasUnit qu:TrueFalse .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#sensorUltrasonik2314
+iotins:sensorUltrasonik2314 rdf:type owl:NamedIndividual ,
+                                     ssn:Sensor ;
+                            iotlite:hasMetadata iotins:Ultrasonik2314Measurement ;
+                            iotlite:hasQuantityKind qu:distance ;
+                            iotlite:hasSensingDevice iotins:distanceSensorRoomUltrasonik2314 ;
+                            iotlite:hasUnit qu:centimeter .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#wew3445
+iotins:wew3445 rdf:type owl:NamedIndividual ,
+                        ssn:Device ;
+               ssn:hasSubsystem iotins:wew3445ActuatorRoomwew3445 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#wew3445ActuatorRoomwew3445
+iotins:wew3445ActuatorRoomwew3445 rdf:type owl:NamedIndividual ,
+                                           san:ActuatingDevice ;
+                                  ssn:hasDeployment iotins:ActuatorRoomwew3445 .
+
+
+###  http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#wew3445Property
+iotins:wew3445Property rdf:type owl:NamedIndividual ,
+                                san:ActuatingProperty ;
+                       ssn:hasValue "OFF" .
+
+
+###  http://purl.org/NET/ssnx/qu/qu#TrueFalse
+qu:TrueFalse rdf:type owl:NamedIndividual ,
+                      qu:Unit .
+
+
+###  http://purl.org/NET/ssnx/qu/qu#centimeter
+qu:centimeter rdf:type owl:NamedIndividual ,
+                       qu:Unit .
+
+
+###  http://purl.org/NET/ssnx/qu/qu#distance
+qu:distance rdf:type owl:NamedIndividual ,
+                     qu:quantityKind .
+
+
+###  http://purl.org/NET/ssnx/qu/qu#motion
+qu:motion rdf:type owl:NamedIndividual ,
+                   qu:quantityKind .
+
+
+###  http://www.irit.fr/recherches/MELODI/ontologies/SAN#Light
+san:Light rdf:type owl:NamedIndividual ,
+                   san:Effect .
+
+
+###  Generated by the OWL API (version 4.2.6.20160910-2108) https://github.com/owlcs/owlapi

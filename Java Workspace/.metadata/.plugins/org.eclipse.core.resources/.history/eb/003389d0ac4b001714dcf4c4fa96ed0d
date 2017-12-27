@@ -1,0 +1,35 @@
+@prefix qu: http://purl.org/NET/ssnx/qu/qu#
+@prefix geo: http://www.w3.org/2003/01/geo/wgs84_pos#
+@prefix iotlite: http://purl.oclc.org/NET/UNIS/fiware/iot-lite#
+@prefix iotins: http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#
+@prefix ssn: http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#
+@prefix san: http://www.irit.fr/recherches/MELODI/ontologies/SAN#
+@prefix home-dataset: http://sensormeasurement.appspot.com/dataset/home-dataset#
+
+[HighLighting: 
+              (?measurement rdf:type ssn:sensor)
+              (?measurement iotlite:hasMetadata ?metadata)
+              (?metadata metaDataValue ?v)
+              greaterThan(?v,750)
+              lessThan(?v,2000)
+			  ->
+			  (?metadata rdf:type home-dataset:HighLighting)
+]
+[MediumLighting: 
+              (?measurement rdf:type ssn:sensor)
+              (?measurement iotlite:hasMetadata ?metadata)
+              (?metadata metaDataValue ?v)
+              greaterThan(?v,150)
+              lessThan(?v,750)
+			  ->
+			  (?metadata rdf:type home-dataset:MediumLighting)
+]
+[LowLighting: 
+              (?measurement rdf:type ssn:sensor)
+              (?measurement iotlite:hasMetadata ?metadata)
+              (?metadata metaDataValue ?v)
+              greaterThan(?v,20)
+              lessThan(?v,150)
+			  ->
+			  (?metadata rdf:type home-dataset:LowLighting)
+]

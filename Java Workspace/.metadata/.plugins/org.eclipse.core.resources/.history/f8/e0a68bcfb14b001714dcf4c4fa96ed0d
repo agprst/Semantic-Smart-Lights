@@ -1,0 +1,27 @@
+[HighLighting: 
+              (?measurement rdf:type ssn:sensor)
+              (?measurement iotlite:hasMetadata ?metadata)
+              (?metadata metaDataValue ?v)
+              greaterThan(?v,0)
+              lessThan(?v,20)
+			  ->
+			  (?metadata rdf:type home-dataset:HighLighting)
+]
+[MediumLighting: 
+              (?measurement rdf:type ssn:sensor)
+              (?measurement iotlite:hasMetadata ?metadata)
+              (?metadata metaDataValue ?v)
+              greaterThan(?v,21)
+              lessThan(?v,30)
+			  ->
+			  (?metadata rdf:type home-dataset:MediumLighting)
+]
+[LowLighting: 
+              (?measurement rdf:type ssn:sensor)
+              (?measurement iotlite:hasMetadata ?metadata)
+              (?metadata metaDataValue ?v)
+              greaterThan(?v,31)
+              lessThan(?v,50)
+			  ->
+			  (?metadata rdf:type home-dataset:LowLighting)
+]

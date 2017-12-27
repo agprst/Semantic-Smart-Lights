@@ -1,0 +1,40 @@
+@prefix qu: http://purl.org/NET/ssnx/qu/qu#
+@prefix geo: http://www.w3.org/2003/01/geo/wgs84_pos#
+@prefix iotlite: http://purl.oclc.org/NET/UNIS/fiware/iot-lite#
+@prefix iotins: http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#
+@prefix ssn: http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#
+@prefix san: http://www.irit.fr/recherches/MELODI/ontologies/SAN#
+@prefix home-dataset: http://sensormeasurement.appspot.com/dataset/home-dataset#
+@prefix rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+
+[PintuTerbuka: 
+			  (?sensorDevice rdf:type ssn:sensor) 
+			  (?sensorDevice iotlite:hasQuantityKind qu:ultrasonik)
+			  (?sensorDevice iotlite:hasMetadata ?metadata) 
+              (?metadata iotlite:metaDataValue ?v),
+              lessThan(?v, 30),
+              greaterThan(?v, 0)
+			  ->
+			  (?metadata rdf:type home-dataset:PintuTerbuka)
+]
+
+[PintuTertutup: 
+			  (?sensorDevice rdf:type ssn:sensor) 
+			  (?sensorDevice iotlite:hasQuantityKind qu:ultrasonik)
+			  (?sensorDevice iotlite:hasMetadata ?metadata) 
+              (?metadata iotlite:metaDataValue ?v),
+              lessThan(?v, 1000),
+              greaterThan(?v, 29)
+			  ->
+			  (?metadata rdf:type home-dataset:PintuTertutup)
+]
+
+[LowLighting: 
+			  (?sensorDevice rdf:type ssn:sensor) 
+			  (?sensorDevice iotlite:hasMetadata ?metadata) 
+              (?metadata iotlite:metaDataValue ?v),
+              lessThan(?v, 50),
+              greaterThan(?v, 31)
+			  ->
+			  (?metadata rdf:type home-dataset:LowLighting)
+]

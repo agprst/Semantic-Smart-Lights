@@ -1,0 +1,148 @@
+import static spark.Spark.*;
+import com.google.gson.Gson;
+
+import java.io.PrintWriter;
+import java.lang.System.*;
+import org.apache.jena.*;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.OWL2;
+
+
+class SensorStruct {
+	String sensorId;
+	String quantitykind;
+	String unit;
+	String metadataType;
+	String metadataValue;
+}
+class ActuatorStruct {
+	String actuatorId;
+	String effect;
+	String value;
+}
+
+
+public class Main {
+	public static String qu = "http://purl.org/NET/ssnx/qu/qu#";
+	public static String geo = "http://www.w3.org/2003/01/geo/wgs84_pos#";
+	public static String iotlite = "http://purl.oclc.org/NET/UNIS/fiware/iot-lite#";
+	public static String iotins = "http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#";
+	public static String ssn = "http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#";
+	public static String san = "http://www.irit.fr/recherches/MELODI/ontologies/SAN#";
+
+	
+    public static void main(String[] args) {
+    	Model m = ModelFactory.createDefaultModel();
+    	Gson gson = new Gson();
+    	
+		initSystem(m);
+    	
+
+    	post("/", (request, response) -> {
+    		SensorStruct data = gson.fromJson(request.body().toString(), SensorStruct.class);
+    		ResIterator iter = m.listResourcesWithProperty(m.getProperty(ssn+"hasSubsystem"), m.getProperty(iotins+data.sensorId));
+    		if (iter.hasNext()){
+    			System.out.println("replace");
+        		replace(m, data);
+        		System.out.println(data.sensorId+" "+data.quantitykind+" "+data.unit+" "+data.metadataValue+" "+data.metadataType);
+    		}else{
+    			System.out.println("init");
+    			initSensor(m, data);
+    			System.out.println(data.sensorId+" "+data.quantitykind+" "+data.unit+" "+data.metadataValue+" "+data.metadataType);
+    		}
+    		PrintWriter writer = new PrintWriter("Ontology.rdf", "UTF-8");
+    		m.write( writer,"N-TRIPLES");
+    		writer.close();
+    		return response.status();
+    	});
+    }
+    
+    
+    public static void initSystem(Model m) {
+
+    	Resource root = m.createResource(iotins+"SemanticHome");
+    	Resource system = m.createResource(ssn+"system");
+    	root.addProperty(RDF.type, OWL2.NamedIndividual)
+    		.addProperty(RDF.type, system);
+    	
+    }
+    
+    public static void initSensor(Model m, SensorStruct sensorInf) {
+
+    	Resource system = m.getResource(iotins+"SemanticHome");
+    	Resource sensorid = m.createResource(iotins+sensorInf.sensorId);
+    	Resource device = m.createResource(ssn+"Device");
+    	Resource RoomSensor = m.createResource(iotins+sensorInf.quantitykind+"SensorRoom"+sensorInf.sensorId);
+    	Resource sensingdevice = m.createResource(ssn+"SensingDevice");
+    	Resource deviceDeployment = m.createResource(iotins+"SensorRoom"+sensorInf);
+    	Resource deployment = m.createResource(ssn+"Deployment");
+    	Resource locationRoom = m.createResource(iotins+"locationRoom"+sensorInf.sensorId);
+    	Resource geoPoint = m.createResource(geo+"Point");
+    	Resource sensor = m.createResource(ssn+"sensor");
+    	Resource SensParam = m.createResource(iotins+sensorInf.unit+sensorInf.metadataType);
+    	Resource sensorDevice = m.createResource(iotins+"sensor"+sensorInf.sensorId);
+    	Resource quantityKind = m.createResource(qu+"quantityKind");
+    	Resource qKindName = m.createResource(qu+sensorInf.quantitykind);
+    	Resource metadata = m.createResource(iotlite+"Metadata");
+    	Resource uName = m.createResource(qu+sensorInf.unit);
+    	Resource unit = m.createResource(qu+"Unit");
+    	
+    	Property hasMetadata = m.createProperty(iotlite+"hasMetadata");
+    	Property hasSensingDevice = m.createProperty(iotlite+"hasSensingDevice");
+    	Property hasUnit = m.createProperty(iotlite+"hasUnit");
+    	Property hasQuantityKind = m.createProperty(iotlite+"hasQuantityKind");
+    	Property metaDataValue = m.createProperty(iotlite+"metaDataValue");
+    	Property metaDataType = m.createProperty(iotlite+"metaDataType");
+    	Property hasLocation = m.createProperty(geo+"hasLocation");
+    	Property hasSubsystem = m.createProperty(ssn+"hasSubsystem");
+    	Property hasDeployment = m.createProperty(ssn+"hasDeployment");
+    	Property altRelative = m.createProperty(iotlite+"altRelative");
+    	
+    	m.add(system, hasSubsystem, sensorid)
+    	 .add(sensorid, RDF.type, OWL2.NamedIndividual)
+    	 .add(sensorid, RDF.type, device)
+    	 .add(sensorid, hasSubsystem, RoomSensor)
+    	 .add(RoomSensor, RDF.type, OWL2.NamedIndividual)
+    	 .add(RoomSensor, RDF.type, sensingdevice)
+    	 .add(RoomSensor, hasDeployment, deviceDeployment)
+    	 .add(deviceDeployment, RDF.type, OWL2.NamedIndividual)
+    	 .add(deviceDeployment, RDF.type, deployment)
+    	 .add(deviceDeployment, hasLocation, locationRoom)
+    	 .add(locationRoom, RDF.type, OWL2.NamedIndividual)
+    	 .add(locationRoom, RDF.type, geoPoint)
+    	 .add(locationRoom, altRelative, "Ruangan")
+    	 .add(sensorDevice, RDF.type, OWL2.NamedIndividual)
+    	 .add(sensorDevice, RDF.type, sensor)
+    	 .add(sensorDevice, hasSensingDevice, RoomSensor)
+    	 .add(sensorDevice, hasQuantityKind, qKindName)
+    	 .add(qKindName, RDF.type, OWL2.NamedIndividual)
+    	 .add(qKindName, RDF.type, quantityKind)
+    	 .add(sensorDevice, hasMetadata, SensParam)
+    	 .add(SensParam, RDF.type, OWL2.NamedIndividual)
+    	 .add(SensParam, RDF.type, metadata)
+    	 .add(SensParam, metaDataType, sensorInf.metadataType)
+    	 .add(SensParam, metaDataValue, sensorInf.metadataValue)
+    	 .add(sensorDevice, hasUnit, uName)
+    	 .add(uName, RDF.type, OWL2.NamedIndividual)
+    	 .add(uName, RDF.type, unit);
+    }
+    
+    public static void replace(Model m, SensorStruct sensorInf){
+    	Property metaDataValue = m.createProperty(iotlite+"metaDataValue");
+    	Resource SensParam = m.createResource(iotins+sensorInf.unit+sensorInf.metadataType);
+    	StmtIterator iter = m.listStatements(
+    			  new
+    			      SimpleSelector(null, null, (RDFNode) null) {
+    			          public boolean selects(Statement s) {
+    			              return (subject == null   || s.getSubject().equals(SensParam))
+    			                  && (predicate == null || s.getPredicate().equals(metaDataValue)) ;
+    			          }
+    			     }
+    			     );
+    	m.remove(iter.nextStatement());
+    	m.add(SensParam, metaDataValue, sensorInf.metadataValue);
+    }
+    
+}

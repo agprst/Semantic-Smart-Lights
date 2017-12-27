@@ -1,0 +1,102 @@
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix san:   <http://www.irit.fr/recherches/MELODI/ontologies/SAN#> .
+@prefix iotlite: <http://purl.oclc.org/NET/UNIS/fiware/iot-lite#> .
+@prefix qu:    <http://purl.org/NET/ssnx/qu/qu#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix hds:   <http://sensormeasurement.appspot.com/dataset/home-dataset#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix ssn:   <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#> .
+@prefix iotins: <http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#> .
+
+iotins:PIR5412Measurement
+        a                      hds:SomeoneInTheRoom , iotlite:Metadata , owl:NamedIndividual ;
+        iotlite:metaDataType   "state" ;
+        iotlite:metaDataValue  "Detected" .
+
+iotins:wew3445Property
+        a             san:ActuatingProperty , owl:NamedIndividual ;
+        ssn:hasValue  "OFF" .
+
+iotins:locationRoomPIR5412
+        a                    geo:Point , owl:NamedIndividual ;
+        iotlite:altRelative  "Ruangan" .
+
+qu:motion  a    qu:quantityKind , owl:NamedIndividual .
+
+iotins:SemanticHome  a    ssn:system , owl:NamedIndividual ;
+        ssn:hasSubsystem  iotins:PIR5412 , iotins:wew3445 , iotins:Ultrasonik2314 .
+
+iotins:PIR5412  a         ssn:Device , owl:NamedIndividual ;
+        ssn:hasSubsystem  iotins:motionSensorRoomPIR5412 .
+
+iotins:actuatorwew3445
+        a                         san:Actuator , owl:NamedIndividual ;
+        san:hasActuatingProperty  iotins:wew3445Property ;
+        san:hasEffect             san:Light ;
+        ssn:hasSubsystem          iotins:wew3445ActuatorRoomwew3445 .
+
+iotins:SensorRoomUltrasonik2314
+        a                ssn:Deployment , owl:NamedIndividual ;
+        geo:hasLocation  iotins:locationRoomUltrasonik2314 .
+
+qu:TrueFalse  a  qu:Unit , owl:NamedIndividual .
+
+iotins:locationRoomUltrasonik2314
+        a                    geo:Point , owl:NamedIndividual ;
+        iotlite:altRelative  "Ruangan" .
+
+iotins:wew3445  a         ssn:Device , owl:NamedIndividual ;
+        ssn:hasSubsystem  iotins:wew3445ActuatorRoomwew3445 .
+
+iotins:motionSensorRoomPIR5412
+        a                  ssn:SensingDevice , owl:NamedIndividual ;
+        ssn:hasDeployment  iotins:SensorRoomPIR5412 .
+
+iotins:wew3445ActuatorRoomwew3445
+        a                  san:ActuatingDevice , owl:NamedIndividual ;
+        ssn:hasDeployment  iotins:ActuatorRoomwew3445 .
+
+qu:centimeter  a  qu:Unit , owl:NamedIndividual .
+
+iotins:Ultrasonik2314Measurement
+        a                      iotlite:Metadata , owl:NamedIndividual ;
+        iotlite:metaDataType   "TrueFalse" ;
+        iotlite:metaDataValue  "214"^^xsd:int .
+
+iotins:locationRoomwew3445
+        a                    geo:Point , owl:NamedIndividual ;
+        iotlite:altRelative  "Ruangan" .
+
+iotins:sensorUltrasonik2314
+        a                         ssn:Sensor , owl:NamedIndividual ;
+        iotlite:hasMetadata       iotins:Ultrasonik2314Measurement ;
+        iotlite:hasQuantityKind   qu:distance ;
+        iotlite:hasSensingDevice  iotins:distanceSensorRoomUltrasonik2314 ;
+        iotlite:hasUnit           qu:centimeter .
+
+qu:distance  a  qu:quantityKind , owl:NamedIndividual .
+
+iotins:Ultrasonik2314
+        a                 ssn:Device , owl:NamedIndividual ;
+        ssn:hasSubsystem  iotins:distanceSensorRoomUltrasonik2314 .
+
+iotins:sensorPIR5412  a           ssn:Sensor , owl:NamedIndividual ;
+        iotlite:hasMetadata       iotins:PIR5412Measurement ;
+        iotlite:hasQuantityKind   qu:motion ;
+        iotlite:hasSensingDevice  iotins:motionSensorRoomPIR5412 ;
+        iotlite:hasUnit           qu:TrueFalse .
+
+san:Light  a    san:Effect .
+
+iotins:ActuatorRoomwew3445
+        a                ssn:Deployment , owl:NamedIndividual ;
+        geo:hasLocation  iotins:locationRoomwew3445 .
+
+iotins:distanceSensorRoomUltrasonik2314
+        a                  ssn:SensingDevice , owl:NamedIndividual ;
+        ssn:hasDeployment  iotins:SensorRoomUltrasonik2314 .
+
+iotins:SensorRoomPIR5412
+        a                ssn:Deployment , owl:NamedIndividual ;
+        geo:hasLocation  iotins:locationRoomPIR5412 .

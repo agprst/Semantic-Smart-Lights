@@ -1,0 +1,296 @@
+import static spark.Spark.*;
+import com.google.gson.Gson;
+
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.lang.System.*;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.jena.*;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
+import org.apache.jena.reasoner.rulesys.Rule;
+import org.apache.jena.util.PrintUtil;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.OWL2;
+
+
+class SensorStruct {
+	String sensorId;
+	String quantitykind;
+	String unit;
+	String metadataType;
+	String metadataValue;
+}
+class ActuatorStruct {
+	String actuatorId;
+	String effect;
+	String value;
+}
+
+
+public class Main {
+	public static String XSD = "http://www.w3.org/2001/XMLSchema#";
+	public static String qu = "http://purl.org/NET/ssnx/qu/qu#";
+	public static String geo = "http://www.w3.org/2003/01/geo/wgs84_pos#";
+	public static String iotlite = "http://purl.oclc.org/NET/UNIS/fiware/iot-lite#";
+	public static String iotins = "http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#";
+	public static String ssn = "http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#";
+	public static String san = "http://www.irit.fr/recherches/MELODI/ontologies/SAN#";
+	public static String hds = "http://sensormeasurement.appspot.com/dataset/home-dataset#";
+	
+
+	
+    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+    	Model m = ModelFactory.createDefaultModel();
+    	 m.setNsPrefix( "qu", qu );
+    	 m.setNsPrefix( "geo", geo );
+    	 m.setNsPrefix( "iotlite", iotlite );
+    	 m.setNsPrefix( "iotins", iotins );
+    	 m.setNsPrefix( "ssn", ssn );
+    	 m.setNsPrefix( "san", san );
+    	 m.setNsPrefix( "hds", hds );
+    	 m.setNsPrefix( "owl", OWL2.getURI());
+    	 m.setNsPrefix("rdf", RDF.getURI());
+    	 m.setNsPrefix("xsd", XSD);
+    	Gson gson = new Gson();
+    	
+		initSystem(m);
+    	
+
+    	post("/sensor", (request, response) -> {
+    		SensorStruct data = gson.fromJson(request.body().toString(), SensorStruct.class);
+    		ResIterator iter = m.listResourcesWithProperty(m.getProperty(ssn+"hasSubsystem"), m.getProperty(iotins+data.sensorId));
+    		if (iter.hasNext()){
+    			
+    			System.out.println("replace sensor value");
+        		updateSensor(m, data);
+        	}else{
+    			System.out.println("init sensor data");
+    			initSensor(m, data);
+    		}
+    		reasoning(m);
+    		
+    		return 1;
+    	});
+    	 
+    	post("/actuator", (request, response) -> {
+    		ActuatorStruct data = gson.fromJson(request.body().toString(), ActuatorStruct.class);
+    		ResIterator iter = m.listResourcesWithProperty(m.getProperty(ssn+"hasSubsystem"), m.getProperty(iotins+data.actuatorId));
+    		if (iter.hasNext()){
+    			System.out.println("query actuator value");
+    			queryLight(m, data);
+    		}else{
+    			System.out.println("init actuator data");
+    			initActuator(m, data);
+    		}
+    		reasoning(m);
+    		
+    		return 1;
+    	});
+    	PrintWriter writer = new PrintWriter("Ontology.rdf", "UTF-8");
+		m.write(writer, "TURTLE");
+		writer.close();
+    }
+    
+    
+    public static void initSystem(Model m) {
+
+    	Resource root = m.createResource(iotins+"SemanticHome");
+    	Resource system = m.createResource(ssn+"system");
+    	root.addProperty(RDF.type, OWL2.NamedIndividual)
+    		.addProperty(RDF.type, system);
+    }
+    
+    public static void initSensor(Model m, SensorStruct sensorInf) {
+
+    	Resource system = m.getResource(iotins+"SemanticHome");
+    	Resource sensorid = m.createResource(iotins+sensorInf.sensorId);
+    	Resource device = m.createResource(ssn+"Device");
+    	Resource RoomSensor = m.createResource(iotins+sensorInf.quantitykind+"SensorRoom"+sensorInf.sensorId);
+    	Resource sensingdevice = m.createResource(ssn+"SensingDevice");
+    	Resource deviceDeployment = m.createResource(iotins+"SensorRoom"+sensorInf.sensorId);
+    	Resource deployment = m.createResource(ssn+"Deployment");
+    	Resource locationRoom = m.createResource(iotins+"locationRoom"+sensorInf.sensorId);
+    	Resource geoPoint = m.createResource(geo+"Point");
+    	Resource sensor = m.createResource(ssn+"Sensor");
+    	Resource SensParam = m.createResource(iotins+sensorInf.sensorId+"Measurement");
+    	Resource sensorDevice = m.createResource(iotins+"sensor"+sensorInf.sensorId);
+    	Resource quantityKind = m.createResource(qu+"quantityKind");
+    	Resource qKindName = m.createResource(qu+sensorInf.quantitykind);
+    	Resource metadata = m.createResource(iotlite+"Metadata");
+    	Resource uName = m.createResource(qu+sensorInf.unit);
+    	Resource unit = m.createResource(qu+"Unit");
+    	
+    	Property hasMetadata = m.createProperty(iotlite+"hasMetadata");
+    	Property hasSensingDevice = m.createProperty(iotlite+"hasSensingDevice");
+    	Property hasUnit = m.createProperty(iotlite+"hasUnit");
+    	Property hasQuantityKind = m.createProperty(iotlite+"hasQuantityKind");
+    	Property metaDataValue = m.createProperty(iotlite+"metaDataValue");
+    	Property metaDataType = m.createProperty(iotlite+"metaDataType");
+    	Property hasLocation = m.createProperty(geo+"hasLocation");
+    	Property hasSubsystem = m.createProperty(ssn+"hasSubsystem");
+    	Property hasDeployment = m.createProperty(ssn+"hasDeployment");
+    	Property altRelative = m.createProperty(iotlite+"altRelative");
+    	Literal l;
+    	if (isNumeric(sensorInf.metadataValue)){
+    		l = m.createTypedLiteral(new Integer(sensorInf.metadataValue));	
+    	}else{
+    		l = m.createTypedLiteral(sensorInf.metadataValue);
+    	}
+    	
+    	m.add(system, hasSubsystem, sensorid)
+    	 .add(sensorid, RDF.type, OWL2.NamedIndividual)
+    	 .add(sensorid, RDF.type, device)
+    	 .add(sensorid, hasSubsystem, RoomSensor)
+    	 .add(RoomSensor, RDF.type, OWL2.NamedIndividual)
+    	 .add(RoomSensor, RDF.type, sensingdevice)
+    	 .add(RoomSensor, hasDeployment, deviceDeployment)
+    	 .add(deviceDeployment, RDF.type, OWL2.NamedIndividual)
+    	 .add(deviceDeployment, RDF.type, deployment)
+    	 .add(deviceDeployment, hasLocation, locationRoom)
+    	 .add(locationRoom, RDF.type, OWL2.NamedIndividual)
+    	 .add(locationRoom, RDF.type, geoPoint)
+    	 .add(locationRoom, altRelative, "Ruangan")
+    	 .add(sensorDevice, RDF.type, OWL2.NamedIndividual)
+    	 .add(sensorDevice, RDF.type, sensor)
+    	 .add(sensorDevice, hasSensingDevice, RoomSensor)
+    	 .add(sensorDevice, hasQuantityKind, qKindName)
+    	 .add(qKindName, RDF.type, OWL2.NamedIndividual)
+    	 .add(qKindName, RDF.type, quantityKind)
+    	 .add(sensorDevice, hasMetadata, SensParam)
+    	 .add(SensParam, RDF.type, OWL2.NamedIndividual)
+    	 .add(SensParam, RDF.type, metadata)
+    	 .add(SensParam, metaDataType, sensorInf.metadataType)
+    	 .add(SensParam, metaDataValue, l)
+    	 .add(sensorDevice, hasUnit, uName)
+    	 .add(uName, RDF.type, OWL2.NamedIndividual)
+    	 .add(uName, RDF.type, unit);
+    }
+    
+    public static void initActuator(Model m, ActuatorStruct actuatorInf) {
+
+    	Resource system = m.getResource(iotins+"SemanticHome");
+    	Resource actuatorid = m.createResource(iotins+actuatorInf.actuatorId);
+    	Resource device = m.createResource(ssn+"Device");
+    	Resource RoomActuator = m.createResource(iotins+actuatorInf.actuatorId+"ActuatorRoom"+actuatorInf.actuatorId);
+    	Resource actuatingdevice = m.createResource(san+"ActuatingDevice");
+    	Resource deviceDeployment = m.createResource(iotins+"ActuatorRoom"+actuatorInf.actuatorId);
+    	Resource deployment = m.createResource(ssn+"Deployment");
+    	Resource locationRoom = m.createResource(iotins+"locationRoom"+actuatorInf.actuatorId);
+    	Resource geoPoint = m.createResource(geo+"Point");
+    	Resource actuator = m.createResource(san+"Actuator");
+    	Resource actuatorDevice = m.createResource(iotins+"actuator"+actuatorInf.actuatorId);
+    	Resource deviceProp = m.createResource(iotins+actuatorInf.actuatorId+"Property");
+    	Resource actuatingProp = m.createResource(san+"ActuatingProperty");
+    	Resource deviceEffect = m.createResource(san+actuatorInf.effect);
+    	Resource Effect = m.createResource(san+"Effect");
+    	
+    	Property altRelative = m.createProperty(iotlite+"altRelative");
+    	Property hasValue = m.createProperty(ssn+"hasValue");
+    	Property hasActuatingProperty = m.createProperty(san+"hasActuatingProperty");
+    	Property hasEffect = m.createProperty(san+"hasEffect");
+    	Property hasSubsystem = m.createProperty(ssn+"hasSubsystem");
+    	Property hasDeployment = m.createProperty(ssn+"hasDeployment");
+    	Property hasLocation = m.createProperty(geo+"hasLocation");
+    	
+    	
+    	m.add(system, hasSubsystem, actuatorid)
+    	 .add(actuatorid, RDF.type, OWL2.NamedIndividual)
+    	 .add(actuatorid, RDF.type, device)
+    	 .add(actuatorid, hasSubsystem, RoomActuator)
+    	 .add(RoomActuator, RDF.type, OWL2.NamedIndividual)
+    	 .add(RoomActuator, RDF.type, actuatingdevice)
+    	 .add(RoomActuator, hasDeployment, deviceDeployment)
+    	 .add(deviceDeployment, RDF.type, OWL2.NamedIndividual)
+    	 .add(deviceDeployment, RDF.type, deployment)
+    	 .add(deviceDeployment, hasLocation, locationRoom)
+    	 .add(locationRoom, RDF.type, OWL2.NamedIndividual)
+    	 .add(locationRoom, RDF.type, geoPoint)
+    	 .add(locationRoom, altRelative, "Ruangan")
+    	 .add(actuatorDevice, RDF.type, OWL2.NamedIndividual)
+    	 .add(actuatorDevice, RDF.type, actuator)
+    	 .add(actuatorDevice, hasSubsystem, RoomActuator)
+    	 .add(actuatorDevice, hasActuatingProperty, deviceProp)
+    	 .add(deviceProp, RDF.type, OWL2.NamedIndividual)
+    	 .add(deviceProp, RDF.type, actuatingProp)
+    	 .add(deviceProp, hasValue, actuatorInf.value)
+    	 .add(actuatorDevice, hasEffect, deviceEffect)
+    	 .add(deviceEffect, RDF.type, Effect);
+    }
+    
+    public static void updateSensor(Model m, SensorStruct sensorInf){
+    	Property metaDataValue = m.createProperty(iotlite+"metaDataValue");
+    	Resource SensParam = m.createResource(iotins+sensorInf.sensorId+"Measurement");
+    	StmtIterator iter = m.listStatements(
+    			  new
+    			      SimpleSelector(null, metaDataValue, (RDFNode) null) {
+    			          public boolean selects(Statement s) {
+    			              return (subject == null   || s.getSubject().equals(SensParam))
+    			                  && (predicate == null || s.getPredicate().equals(metaDataValue)) ;
+    			          }
+    			     }
+    			     );
+    	m.remove(iter.nextStatement());
+    	Literal l;
+    	if (isNumeric(sensorInf.metadataValue)){
+    		l = m.createTypedLiteral(new Integer(sensorInf.metadataValue));	
+    		m.add(SensParam, metaDataValue, l);
+    	}else{
+    		l = m.createTypedLiteral(sensorInf.metadataValue);
+    		m.add(SensParam, metaDataValue, l);
+    	}
+    }
+    
+    public static void reasoning(Model m) throws FileNotFoundException, UnsupportedEncodingException{
+    	Property metaDataValue = m.createProperty(iotlite+"metaDataValue");
+    	List rules = Rule.rulesFromURL("file:semantic.rules");
+    	Reasoner reasoner = new GenericRuleReasoner(rules);
+    	InfModel inf = ModelFactory.createInfModel(reasoner, m);
+    	System.out.println("A *  =>");
+    	Iterator list = inf.listStatements(null, metaDataValue, (RDFNode)null);
+    	while (list.hasNext()) {
+    	    System.out.println(" - " + list.next());
+    	}
+		PrintWriter infwrite = new PrintWriter("infModel.rdf", "UTF-8");
+		inf.write(infwrite, "TURTLE");
+		infwrite.close();
+    }
+    
+    public static void queryLight(Model m, ActuatorStruct actuatorInf){ 
+    	String queryString = 
+    	    "PREFIX ssn: <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#> " +
+    	    "PREFIX iotins: <http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#> " +
+    	    "SELECT ?value " +
+    	    "WHERE {" +
+    	    "      iotins:"+actuatorInf.actuatorId+"Property ssn:hasValue ?value . " +
+    	    "      }";
+    	 
+    	Query query = QueryFactory.create(queryString);
+    	 
+    	QueryExecution qe = QueryExecutionFactory.create(query, m);
+    	ResultSet results = qe.execSelect();
+    	//System.out.println("wew "+results.nextSolution());
+    	ResultSetFormatter.out(System.out, results, query);
+    	qe.close();
+    }
+    
+    public static boolean isNumeric(String str)
+    {
+        for (char c : str.toCharArray())
+        {
+            if (!Character.isDigit(c)) return false;
+        }
+        return true;
+    }
+}

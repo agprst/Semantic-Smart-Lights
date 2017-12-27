@@ -1,0 +1,74 @@
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix san:   <http://www.irit.fr/recherches/MELODI/ontologies/SAN#> .
+@prefix iotlite: <http://purl.oclc.org/NET/UNIS/fiware/iot-lite#> .
+@prefix qu:    <http://purl.org/NET/ssnx/qu/qu#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix hds:   <http://sensormeasurement.appspot.com/dataset/home-dataset#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix time:  <http://www.w3.org/2006/time#> .
+@prefix ssn:   <http://www.w3.org/2005/Incubator/ssn/ssnx/ssn#> .
+@prefix iotins: <http://purl.oclc.org/NET/UNIS/iot-lite/iot-liteInstance#> .
+
+iotins:sensorLdr4132  a           ssn:Sensor , owl:NamedIndividual ;
+        iotlite:hasMetadata       iotins:Ldr4132Measurement ;
+        iotlite:hasQuantityKind   qu:luminosity ;
+        iotlite:hasSensingDevice  iotins:luminositySensorRoomLdr4132 ;
+        iotlite:hasUnit           qu:lumen .
+
+iotins:Ldr4132Measurement
+        a                      iotlite:Metadata , owl:NamedIndividual ;
+        iotlite:metaDataValue  "569"^^xsd:int .
+
+iotins:luminositySensorRoomLdr4132
+        a                  ssn:SensingDevice , owl:NamedIndividual ;
+        ssn:hasDeployment  iotins:SensorRoomLdr4132 .
+
+qu:lumen  a     qu:Unit , owl:NamedIndividual .
+
+iotins:actuatorRelay3445
+        a                         san:Actuator , owl:NamedIndividual ;
+        san:hasActuatingProperty  iotins:Relay3445Property ;
+        san:hasEffect             san:light ;
+        ssn:hasSubsystem          iotins:Relay3445ActuatorRoomRelay3445 .
+
+iotins:locationRoomLdr4132
+        a                    geo:Point , owl:NamedIndividual ;
+        iotlite:altRelative  "Ruang Garasi" .
+
+iotins:SensorRoomLdr4132
+        a                ssn:Deployment , owl:NamedIndividual ;
+        geo:hasLocation  iotins:locationRoomLdr4132 .
+
+san:light  a    san:Effect .
+
+iotins:Relay3445  a       ssn:Device , owl:NamedIndividual ;
+        ssn:hasSubsystem  iotins:Relay3445ActuatorRoomRelay3445 .
+
+iotins:Relay3445ActuatorRoomRelay3445
+        a                  san:ActuatingDevice , owl:NamedIndividual ;
+        ssn:hasDeployment  iotins:ActuatorRoomRelay3445 .
+
+qu:luminosity  a  qu:quantityKind , owl:NamedIndividual .
+
+iotins:Relay3445Property
+        a       san:ActuatingProperty , owl:NamedIndividual .
+
+iotins:locationRoomRelay3445
+        a                    geo:Point , owl:NamedIndividual ;
+        iotlite:altRelative  "Ruang Garasi Area 1" .
+
+iotins:SemanticHome  a               ssn:system , owl:NamedIndividual ;
+        ssn:hasSubsystem             iotins:Ldr4132 , iotins:Relay3445 ;
+        time:hasDateTimeDescription  iotins:SystemDateTime .
+
+iotins:Ldr4132  a         ssn:Device , owl:NamedIndividual ;
+        ssn:hasSubsystem  iotins:luminositySensorRoomLdr4132 .
+
+iotins:SystemDateTime
+        a             time:DateTimeDescription ;
+        time:hasTime  "8"^^xsd:int .
+
+iotins:ActuatorRoomRelay3445
+        a                ssn:Deployment , owl:NamedIndividual ;
+        geo:hasLocation  iotins:locationRoomRelay3445 .
